@@ -14,13 +14,18 @@ from config.settings import (
     PORTFOLIO_FILE,
     TARGET_PROFIT_PCT,
 )
-from data.market_discovery import save_daily_candidates
+from data.market_discovery import discover_market_stocks, save_daily_candidates
 from strategies.exit_advisor import evaluate_all, format_bucket_status
 from strategies.momentum_scanner import (
     format_buy_recommendation,
     format_discovery_summary,
     scan_momentum_buys,
 )
+from strategies.premarket_analyzer import (
+    analyze_premarket_stocks,
+    format_premarket_report,
+)
+from config.settings import PREMARKET_ONLY
 from trading.bucket import Bucket, display_symbol, normalize_symbol
 from trading.fees import net_pnl
 from utils.logger import logger
@@ -130,29 +135,20 @@ class AlgoTradeApp:
         logger.info("Running pre-market discovery scan")
         send_message_sync("🌅 *Pre-market scan starting...*\nFetching NSE pre-open & top gainers...")
 
-        candidates, discovered = scan_momentum_buys(
-            exclude_symbols=[],
-            interval=INTERVAL,
-            max_results=MAX_BUY_SUGGESTIONS,
-            pre_market=True,
-        )
+        # Discover stocks from NSE pre-open / gainers
+        discovered = discover_market_stocks(pre_market=True, limit=25)
         save_daily_candidates(discovered, CANDIDATES_FILE)
 
-        send_message_sync(format_discovery_summary(discovered, pre_market=True))
+        # Run the new pre-market analyzer with profit predictions
+        send_message_sync("📊 Analysing historical data for profit predictions...")
+        picks = analyze_premarket_stocks(discovered, max_results=MAX_BUY_SUGGESTIONS)
 
-        if candidates:
-            send_message_sync(
-                "🎯 *Pre-market picks for today:*\n"
-                "These stocks are gap-up / gaining early. "
-                "Watch at 9:15 AM open — I'll re-check momentum before suggesting BUY."
-            )
-            for c in candidates:
-                send_message_sync(format_buy_recommendation(c))
-        else:
-            send_message_sync(
-                "Pre-market: no strong picks yet.\n"
-                "I'll scan live gainers after 9:15 AM when you send /run."
-            )
+        # Send the comprehensive pre-market report
+        report = format_premarket_report(picks)
+        send_message_sync(report)
+
+        # Also send the raw discovery summary for transparency
+        send_message_sync(format_discovery_summary(discovered, pre_market=True))
 
         self.pre_market_done = True
 
@@ -229,7 +225,9 @@ class AlgoTradeApp:
                         else:
                             self.eod_alert_sent = False
                             self._check_sells(force_eod=False)
-                            self._check_buys()
+                            # Live scanning is optional — skip if PREMARKET_ONLY
+                            if not PREMARKET_ONLY:
+                                self._check_buys()
 
                     # Reset pre-market flag at midnight next day
                     if not is_pre_market_window(MARKET) and not is_market_open(MARKET):

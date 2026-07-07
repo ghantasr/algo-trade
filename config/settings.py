@@ -45,6 +45,10 @@ MAX_BUY_SUGGESTIONS = int(os.getenv("MAX_BUY_SUGGESTIONS", "2"))
 # Minimum % gain today before suggesting a buy (must already be moving up)
 MIN_GAIN_PCT = float(os.getenv("MIN_GAIN_PCT", "0.5"))
 
+# Pre-market analysis settings
+PREDICTION_LOOKBACK_DAYS = int(os.getenv("PREDICTION_LOOKBACK_DAYS", "20"))
+PREMARKET_ONLY = os.getenv("PREMARKET_ONLY", "false").lower() == "true"
+
 # File to store today's discovered stocks
 CANDIDATES_FILE = os.getenv("CANDIDATES_FILE", "data/daily_candidates.json")
 
