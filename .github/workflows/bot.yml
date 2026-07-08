@@ -2,9 +2,15 @@ name: Run Algo Trade Bot
 
 on:
   schedule:
-    # Run every 4 hours on weekdays to cover full NSE trading day
-    # 4:30 AM IST → 8:30 AM IST → 12:30 PM IST → 4:30 PM IST
-    - cron: '30 23,3,7,11 * * 1-5'
+    # Run every 2 hours on weekdays to cover full NSE trading day
+    # with overlap so there's no gap between runs
+    # Times in UTC (IST = UTC + 5:30):
+    # 2:30 AM UTC = 8:00 AM IST (pre-market)
+    # 4:30 AM UTC = 10:00 AM IST (market open)
+    # 6:30 AM UTC = 12:00 PM IST
+    # 8:30 AM UTC = 2:00 PM IST
+    # 10:30 AM UTC = 4:00 PM IST (post-market)
+    - cron: '30 2,4,6,8,10 * * 1-5'
   workflow_dispatch:
 
 concurrency:
@@ -14,7 +20,7 @@ concurrency:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 115  # ~1h55m (under 2h, so next cron overlaps)
 
     steps:
       - name: Checkout repo
@@ -64,7 +70,7 @@ jobs:
           echo "🤖 Starting Algo Trade Bot..."
           echo "Market: NSE (India)"
           echo "Check interval: ${CHECK_INTERVAL}s"
-          echo "Max runtime: 350 minutes"
+          echo "Max runtime: 115 minutes"
           echo ""
           
           mkdir -p data
