@@ -7,4 +7,7 @@ venv/
 # Data files (generated at runtime, not committed)
 data/*.json
 data/__pycache__/
+data/portfolio.json
+data/known_chat_ids.json
+data/daily_candidates.json
 .DS_Store
