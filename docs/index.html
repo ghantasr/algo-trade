@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algo Trade — NSE Intraday Advisory Bot</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --heading: #f0f6fc;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --red: #f85149;
+            --yellow: #d29922;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: var(--heading); font-size: 2rem; margin-bottom: 0.5rem; }
+        h1 span { color: var(--accent); }
+        h2 { color: var(--heading); font-size: 1.4rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+        h3 { color: var(--heading); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+        p { margin-bottom: 1rem; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .badge-green { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+        .badge-blue { background: rgba(88,166,255,0.15); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+        .badge-yellow { background: rgba(210,153,34,0.15); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+        .badge-red { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .flow { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 1rem 0; }
+        .flow-step {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .flow-arrow { color: var(--accent); font-size: 1.2rem; }
+        code {
+            background: rgba(88,166,255,0.1);
+            border: 1px solid rgba(88,166,255,0.2);
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+            font-size: 0.85rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        pre {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+        }
+        pre code { background: none; border: none; padding: 0; }
+        .cmd-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .cmd-table th, .cmd-table td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .cmd-table th { color: var(--heading); font-weight: 600; }
+        .cmd-table tr:hover { background: rgba(88,166,255,0.05); }
+        .footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: #8b949e; }
+        .status-dot {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            margin-right: 0.4rem;
+        }
+        .status-dot.green { background: var(--green); }
+        .status-dot.yellow { background: var(--yellow); }
+        .status-dot.red { background: var(--red); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span>📈</span> Algo Trade</h1>
+        <p><strong>NSE Intraday Advisory Bot</strong> — Telegram-powered stock market advisor for Indian markets.</p>
+
+        <div style="margin: 1rem 0;">
+            <span class="badge badge-green">Python</span>
+            <span class="badge badge-blue">NSE</span>
+            <span class="badge badge-yellow">Telegram Bot</span>
+            <span class="badge badge-red">Intraday Trading</span>
+        </div>
+
+        <div class="card">
+            <h3>🚀 Quick Links</h3>
+            <p>
+                <a href="https://github.com/ghantasr/algo-trade">GitHub Repository</a> &middot;
+                <a href="https://github.com/ghantasr/algo-trade/blob/master/README.md">README</a> &middot;
+                <a href="https://github.com/ghantasr/algo-trade/blob/master/COMMANDS.md">Commands Reference</a>
+            </p>
+            <p>
+                <span class="status-dot green"></span> Bot Status: <strong>Ready to deploy</strong>
+            </p>
+        </div>
+
+        <h2>How It Works</h2>
+        <div class="flow">
+            <span class="flow-step">📡 Scan NSE Stocks</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">📲 BUY Alert on Telegram</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">👤 You buy on broker</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">✅ Confirm with /bought</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">🤖 Bot tracks position</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">🔴 SELL Alert sent</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">💰 You sell & confirm</span>
+        </div>
+
+        <h2>Telegram Commands</h2>
+        <table class="cmd-table">
+            <thead>
+                <tr><th>Command</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>/run</code></td><td>Start scanning NSE stocks</td></tr>
+                <tr><td><code>/stop</code></td><td>Pause scanning</td></tr>
+                <tr><td><code>/scan</code></td><td>Scan for buy opportunities now</td></tr>
+                <tr><td><code>/bucket</code></td><td>Show holdings & P&L (after fees)</td></tr>
+                <tr><td><code>/bought SYMBOL QTY PRICE</code></td><td>Confirm you bought a stock</td></tr>
+                <tr><td><code>/sold SYMBOL QTY PRICE</code></td><td>Confirm you sold a stock</td></tr>
+                <tr><td><code>/premarket</code></td><td>Run pre-market analysis</td></tr>
+                <tr><td><code>/help</code></td><td>Show all commands</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Quick Start</h2>
+        <div class="card">
+            <pre><code># Clone the repo
+git clone https://github.com/ghantasr/algo-trade.git
+cd algo-trade
+
+# Set up environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+
+# Edit .env with your Telegram credentials
+# Then run:
+python main.py</code></pre>
+            <p>Send <code>/run</code> on Telegram during market hours (9:15 AM – 3:30 PM IST).</p>
+        </div>
+
+        <h2>Features</h2>
+        <div class="card">
+            <ul style="padding-left: 1.5rem;">
+                <li><strong>MA Crossover Strategy</strong> — Moving average based buy/sell signals</li>
+                <li><strong>Momentum Scanner</strong> — Detects high-volume breakout stocks</li>
+                <li><strong>Pre-Market Analysis</strong> — Analyze market sentiment before open</li>
+                <li><strong>Paper Trading</strong> — Track positions with a virtual "bucket"</li>
+                <li><strong>Fee Calculator</strong> — Zerodha-style brokerage fees included</li>
+                <li><strong>Exit Advisor</strong> — Smart exit recommendations with stop-loss</li>
+                <li><strong>Market Hours</strong> — Auto-pauses outside NSE hours</li>
+            </ul>
+        </div>
+
+        <h2>Disclaimer</h2>
+        <div class="card" style="border-color: rgba(210,153,34,0.3);">
+            <p style="font-size: 0.9rem; color: #8b949e;">
+                This is an <strong>educational tool</strong>, not financial advice. Intraday trading involves significant risk.
+                Never invest money you cannot afford to lose. The bot does <strong>not</strong> place real orders —
+                you trade manually on your broker platform.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>
+                <a href="https://github.com/ghantasr/algo-trade">ghantasr/algo-trade</a> &middot;
+                Built with Python & ❤️
+            </p>
+        </div>
+    </div>
+</body>
+</html>
