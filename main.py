@@ -197,22 +197,16 @@ class AlgoTradeApp:
     def advisory_loop(self):
         logger.info("Advisory loop started (dynamic NSE discovery)")
 
-        # Skip startup broadcast on GitHub Actions (bot restarts every 2h)
-        # to avoid spamming users. Only broadcast on first run of the day.
-        import os as _os
-        if not _os.getenv("GITHUB_ACTIONS"):
-            send_message_sync(
-                f"🇮🇳 *NSE Momentum Advisor Online*\n\n"
-                f"No fixed watchlist — I scan NSE / Moneycontrol live\n"
-                f"Investment per trade: ₹{INVESTMENT_PER_TRADE:,.0f}\n"
-                f"Target: 5–10% profit after broker fees\n"
-                f"Exit: {EXIT_MINUTES_BEFORE_CLOSE} min before 3:30 PM\n\n"
-                f"/run — start scanning\n"
-                f"/scan — scan now\n"
-                f"/help — commands"
-            )
-        else:
-            logger.info("Skipping startup broadcast (GitHub Actions — frequent restart)")
+        send_message_sync(
+            f"🇮🇳 *NSE Momentum Advisor Online*\n\n"
+            f"No fixed watchlist — I scan NSE / Moneycontrol live\n"
+            f"Investment per trade: ₹{INVESTMENT_PER_TRADE:,.0f}\n"
+            f"Target: 5–10% profit after broker fees\n"
+            f"Exit: {EXIT_MINUTES_BEFORE_CLOSE} min before 3:30 PM\n\n"
+            f"/run — start scanning\n"
+            f"/scan — scan now\n"
+            f"/help — commands"
+        )
 
         while True:
             if self.is_running:
