@@ -1,0 +1,96 @@
+name: Run Algo Trade Bot
+
+on:
+  schedule:
+    # Run every 4 hours on weekdays to cover full NSE trading day
+    # 4:30 AM IST → 8:30 AM IST → 12:30 PM IST → 4:30 PM IST
+    - cron: '30 23,3,7,11 * * 1-5'
+  workflow_dispatch:
+
+concurrency:
+  group: algo-trade-bot
+  cancel-in-progress: false
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download persisted data from previous run
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: algo-trade-data
+          path: data/
+
+      - name: Run bot with data persistence
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CHECK_INTERVAL: 120
+          INVESTMENT_PER_TRADE: 10000
+          TARGET_PROFIT_PCT: 5
+          MAX_PROFIT_PCT: 10
+          STOP_LOSS_PCT: 2
+          EXIT_MINUTES_BEFORE_CLOSE: 60
+          MAX_POSITIONS: 3
+          MAX_BUY_SUGGESTIONS: 2
+          MIN_GAIN_PCT: 0.5
+          PREDICTION_LOOKBACK_DAYS: 20
+          PREMARKET_ONLY: false
+          INTERVAL: 5m
+          SHORT_MA: 9
+          LONG_MA: 21
+          CANDIDATES_FILE: data/daily_candidates.json
+          PORTFOLIO_FILE: data/portfolio.json
+        run: |
+          set -e
+          
+          echo "🤖 Starting Algo Trade Bot..."
+          echo "Market: NSE (India)"
+          echo "Check interval: ${CHECK_INTERVAL}s"
+          echo "Max runtime: 350 minutes"
+          echo ""
+          
+          mkdir -p data
+          
+          # Trap SIGTERM (sent by GitHub when timeout approaches) to save data
+          _cleanup() {
+            echo ""
+            echo "📦 Saving data before shutdown..."
+            ls -la data/ 2>/dev/null || true
+            echo "✅ Data saved. Bot will resume on next cron trigger."
+            exit 0
+          }
+          trap _cleanup SIGTERM SIGINT
+          
+          # Run the bot
+          python main.py
+          
+          # If bot exits naturally, still save data
+          echo "📦 Bot finished. Saving data..."
+          ls -la data/ 2>/dev/null || true
+
+      - name: Upload data for next run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: algo-trade-data
+          path: data/
+          retention-days: 1
+          overwrite: true

@@ -4,5 +4,7 @@ __pycache__/
 .venv/
 venv/
 *.log
-data/
+# Data files (generated at runtime, not committed)
+data/*.json
+data/__pycache__/
 .DS_Store
