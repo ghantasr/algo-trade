@@ -49,6 +49,9 @@ MIN_GAIN_PCT = float(os.getenv("MIN_GAIN_PCT", "0.5"))
 PREDICTION_LOOKBACK_DAYS = int(os.getenv("PREDICTION_LOOKBACK_DAYS", "20"))
 PREMARKET_ONLY = os.getenv("PREMARKET_ONLY", "false").lower() == "true"
 
+# Auto-start scanning on boot (for headless/GitHub Actions mode)
+AUTO_START = os.getenv("AUTO_START", "false").lower() == "true"
+
 # File to store today's discovered stocks
 CANDIDATES_FILE = os.getenv("CANDIDATES_FILE", "data/daily_candidates.json")
 

@@ -64,6 +64,8 @@ jobs:
           LONG_MA: 21
           CANDIDATES_FILE: data/daily_candidates.json
           PORTFOLIO_FILE: data/portfolio.json
+          # Auto-start scanning in headless (GitHub Actions) mode
+          AUTO_START: true
         run: |
           set -e
           

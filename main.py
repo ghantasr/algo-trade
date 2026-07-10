@@ -25,7 +25,7 @@ from strategies.premarket_analyzer import (
     analyze_premarket_stocks,
     format_premarket_report,
 )
-from config.settings import PREMARKET_ONLY
+from config.settings import AUTO_START, PREMARKET_ONLY
 from trading.bucket import Bucket, display_symbol, normalize_symbol
 from trading.fees import net_pnl
 from utils.logger import logger
@@ -197,6 +197,11 @@ class AlgoTradeApp:
     def advisory_loop(self):
         logger.info("Advisory loop started (dynamic NSE discovery)")
 
+        # Auto-start if configured (GitHub Actions headless mode)
+        if AUTO_START:
+            logger.info("AUTO_START enabled — starting scanning automatically")
+            self.start_scanning()
+
         send_message_sync(
             f"🇮🇳 *NSE Momentum Advisor Online*\n\n"
             f"No fixed watchlist — I scan NSE / Moneycontrol live\n"
@@ -207,6 +212,9 @@ class AlgoTradeApp:
             f"/scan — scan now\n"
             f"/help — commands"
         )
+
+        heartbeat_interval = max(60, CHECK_INTERVAL * 5)  # log every ~10 min
+        next_heartbeat = time.monotonic() + heartbeat_interval
 
         while True:
             if self.is_running:
@@ -240,6 +248,17 @@ class AlgoTradeApp:
                 except Exception as e:
                     logger.error("Advisory error: %s", e)
                     send_message_sync(f"⚠️ Error: {e}")
+
+            # Heartbeat log so we can see bot is alive in GitHub Actions logs
+            now_ts = time.monotonic()
+            if now_ts >= next_heartbeat:
+                status = market_status(MARKET)
+                positions = self.bucket.count()
+                logger.info(
+                    "Heartbeat — running=%s market=%s positions=%d",
+                    self.is_running, status, positions,
+                )
+                next_heartbeat = now_ts + heartbeat_interval
 
             time.sleep(CHECK_INTERVAL)
 
